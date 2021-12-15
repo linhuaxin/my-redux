@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>my-redux</title>
+</head>
+<body>
+  <button id="increment">+1</button>
+  <span id="counter">0</span>
+  <button id="decrement">-1</button>
+
+  <script src="./index.js"></script>
+  <script>
+    const reducer = function (state, action) {
+      switch (action.type) {
+        case 'increment':
+          return {
+            count: state.count + 1
+          }
+        case 'decrement':
+          return {
+            count: state.count - 1
+          }
+        default:
+          return state;
+      }
+    };
+
+    const store = createStore(reducer, { count: 0 });
+
+    store.subscribe(() => {
+      console.log(store.getState());
+    });
+
+    document.getElementById('increment').onclick = function () {
+      store.dispatch({ type: 'increment' });
+    };
+
+    document.getElementById('decrement').onclick = function () {
+      store.dispatch({ type: 'decrement' });
+    };
+  </script>
+</body>
+</html>
