@@ -8,6 +8,7 @@
   <button id="increment">+1</button>
   <span id="counter">0</span>
   <button id="decrement">-1</button>
+  <button id="incrementN">+5</button>
 
   <script src="./index.js"></script>
   <script src="./middleware/logger.js"></script>
@@ -22,6 +23,10 @@
         case 'decrement':
           return {
             count: state.count - 1
+          }
+        case 'incrementN':
+          return {
+            count: state.count + action.payload
           }
         default:
           return state;
@@ -46,7 +51,13 @@
       };
     };
 
+    const increment = () => ({ type: 'increment' });
+    const decrement = () => ({ type: 'decrement' });
+    const incrementN = payload => ({ type: 'incrementN', payload });
+
     const store = createStore(reducer, { count: 0 }, applyMiddleware(logger, thunk));
+
+    const actions = bindActionCreators({ increment, decrement, incrementN }, store.dispatch);
 
     store.subscribe(() => {
       // console.log(store.getState());
@@ -54,16 +65,22 @@
     });
 
     document.getElementById('increment').onclick = function () {
-      store.dispatch({ type: 'increment' });
+      // store.dispatch({ type: 'increment' });
       // store.dispatch(dispatch => {
       //   setTimeout(() => {
       //     dispatch({ type: 'increment' });
       //   }, 2000);
       // });
+      actions.increment();
     };
 
     document.getElementById('decrement').onclick = function () {
-      store.dispatch({ type: 'decrement' });
+      // store.dispatch({ type: 'decrement' });
+      actions.decrement();
+    };
+
+    document.getElementById('incrementN').onclick = function () {
+      actions.incrementN(5);
     };
   </script>
 </body>

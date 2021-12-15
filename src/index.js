@@ -48,3 +48,15 @@ function compose(funcs, dispatch) {
   }
   return dispatch;
 }
+
+function bindActionCreators(actionCreators, dispatch) {
+  let boundActionCreators = {};
+
+  Object.keys(actionCreators).forEach(key => {
+    boundActionCreators[key] = function (payload) {
+      dispatch(actionCreators[key](payload));
+    };
+  })
+
+  return boundActionCreators;
+}
