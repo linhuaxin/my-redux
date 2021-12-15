@@ -5,83 +5,118 @@
   <title>my-redux</title>
 </head>
 <body>
-  <button id="increment">+1</button>
-  <span id="counter">0</span>
-  <button id="decrement">-1</button>
-  <button id="incrementN">+5</button>
+<button id="increment">+1</button>
+<span id="counter">0</span>
+<button id="decrement">-1</button>
+<button id="incrementN">+5</button>
 
-  <script src="./index.js"></script>
-  <script src="./middleware/logger.js"></script>
-  <script src="./middleware/thunk.js"></script>
-  <script>
-    const reducer = function (state, action) {
-      switch (action.type) {
-        case 'increment':
-          return {
-            count: state.count + 1
-          }
-        case 'decrement':
-          return {
-            count: state.count - 1
-          }
-        case 'incrementN':
-          return {
-            count: state.count + action.payload
-          }
-        default:
-          return state;
+<hr/>
+
+<span id="age">0</span>
+<button id="incrementAge">+5</button>
+
+<script src="./index.js"></script>
+<script src="./middleware/logger.js"></script>
+<script src="./middleware/thunk.js"></script>
+<script>
+  const enhancer = function (createStore, reducer, state) {
+    let store = createStore(reducer, state);
+    let dispatch = store.dispatch;
+
+    store.dispatch = function (action) {
+      if (typeof action === 'function') {
+        action(dispatch);
+        return;
       }
+      dispatch(action);
     };
 
-    const enhancer = function (createStore, reducer, state) {
-      let store = createStore(reducer, state);
-      let dispatch = store.dispatch;
-
-      store.dispatch = function(action) {
-        if (typeof action === 'function') {
-          action(dispatch);
-          return;
-        }
-        dispatch(action);
-      };
-
-      return {
-        ...store,
-        dispatch: store.dispatch
-      };
+    return {
+      ...store,
+      dispatch: store.dispatch
     };
+  };
 
-    const increment = () => ({ type: 'increment' });
-    const decrement = () => ({ type: 'decrement' });
-    const incrementN = payload => ({ type: 'incrementN', payload });
+  const counterReducer = function (state, action) {
+    switch (action.type) {
+      case 'increment':
+        return {
+          count: state.count + 1
+        };
+      case 'decrement':
+        return {
+          count: state.count - 1
+        };
+      case 'incrementN':
+        return {
+          count: state.count + action.payload
+        };
+      default:
+        return state;
+    }
+  };
 
-    const store = createStore(reducer, { count: 0 }, applyMiddleware(logger, thunk));
+  const ageReducer = function (state, action) {
+    switch (action.type) {
+      case 'incrementAge':
+        return {
+          age: state.age + action.payload
+        };
+      default:
+        return state;
+    }
+  };
 
-    const actions = bindActionCreators({ increment, decrement, incrementN }, store.dispatch);
+  const increment = () => ({ type: 'increment' });
+  const decrement = () => ({ type: 'decrement' });
+  const incrementN = payload => ({ type: 'incrementN', payload });
+  const incrementAge = payload => ({ type: 'incrementAge', payload });
 
-    store.subscribe(() => {
-      // console.log(store.getState());
-      document.getElementById('counter').innerText = store.getState().count;
-    });
+  const rootReducer = combineReducers({
+    counter: counterReducer,
+    age: ageReducer
+  });
 
-    document.getElementById('increment').onclick = function () {
-      // store.dispatch({ type: 'increment' });
-      // store.dispatch(dispatch => {
-      //   setTimeout(() => {
-      //     dispatch({ type: 'increment' });
-      //   }, 2000);
-      // });
-      actions.increment();
-    };
+  const store = createStore(rootReducer, {
+    counter: { count: 0 },
+    age: { age: 0 },
+  }, applyMiddleware(logger, thunk));
 
-    document.getElementById('decrement').onclick = function () {
-      // store.dispatch({ type: 'decrement' });
-      actions.decrement();
-    };
+  const actions = bindActionCreators({
+    increment,
+    decrement,
+    incrementN,
+    incrementAge
+  }, store.dispatch);
 
-    document.getElementById('incrementN').onclick = function () {
-      actions.incrementN(5);
-    };
-  </script>
+  store.subscribe(() => {
+    console.log(store.getState());
+    document.getElementById('counter').innerText = store.getState().counter.count;
+    document.getElementById('age').innerText = store.getState().age.age;
+  });
+
+  document.getElementById('increment').onclick = function () {
+    // store.dispatch({ type: 'increment' });
+    // store.dispatch(dispatch => {
+    //   setTimeout(() => {
+    //     dispatch({ type: 'increment' });
+    //   }, 2000);
+    // });
+    actions.increment();
+  };
+
+  document.getElementById('decrement').onclick = function () {
+    // store.dispatch({ type: 'decrement' });
+    actions.decrement();
+  };
+
+  document.getElementById('incrementN').onclick = function () {
+    actions.incrementN(5);
+  };
+
+  document.getElementById('incrementAge').onclick = function () {
+    actions.incrementAge(5);
+  };
+</script>
 </body>
 </html>

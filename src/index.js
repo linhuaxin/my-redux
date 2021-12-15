@@ -60,3 +60,19 @@ function bindActionCreators(actionCreators, dispatch) {
 
   return boundActionCreators;
 }
+
+function combineReducers(reducers) {
+  return function (state, action) {
+    const keys = Object.keys(reducers);
+
+    let nextState = {};
+
+    keys.forEach(key => {
+      const reducer = reducers[key];
+      const prevState = state[key];
+      nextState[key] = reducer(prevState, action);
+    });
+
+    return nextState;
+  }
+}
