@@ -1,10 +1,9 @@
-function createStore(reducer, state, enhancer) {
-
+function createStore(reducer, state, applyMiddleware) {
   let _state = state;
   let _listeners = [];
 
-  if (typeof enhancer === 'function') {
-    return enhancer(createStore, reducer, state);
+  if (typeof applyMiddleware === 'function') {
+    return applyMiddleware(createStore, reducer, state);
   }
 
   function getState() {
@@ -28,4 +27,24 @@ function createStore(reducer, state, enhancer) {
     dispatch,
     subscribe
   };
+}
+
+function applyMiddleware(...middlewares) {
+  return function(createStore, reducer, state) {
+    let store = createStore(reducer, state);
+    let funcs = middlewares.map(middleware => middleware(store));
+    let dispatch = compose(funcs, store.dispatch);
+
+    return {
+      ...store,
+      dispatch
+    };
+  };
+}
+
+function compose(funcs, dispatch) {
+  for (let i = funcs.length - 1; i >= 0; i--) {
+    dispatch = funcs[i](dispatch);
+  }
+  return dispatch;
 }

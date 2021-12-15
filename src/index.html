@@ -10,6 +10,8 @@
   <button id="decrement">-1</button>
 
   <script src="./index.js"></script>
+  <script src="./middleware/logger.js"></script>
+  <script src="./middleware/thunk.js"></script>
   <script>
     const reducer = function (state, action) {
       switch (action.type) {
@@ -42,9 +44,9 @@
         ...store,
         dispatch: store.dispatch
       };
-    }
+    };
 
-    const store = createStore(reducer, { count: 0 }, enhancer);
+    const store = createStore(reducer, { count: 0 }, applyMiddleware(logger, thunk));
 
     store.subscribe(() => {
       // console.log(store.getState());
@@ -52,12 +54,12 @@
     });
 
     document.getElementById('increment').onclick = function () {
-      // store.dispatch({ type: 'increment' });
-      store.dispatch(dispatch => {
-        setTimeout(() => {
-          dispatch({ type: 'increment' });
-        }, 2000);
-      });
+      store.dispatch({ type: 'increment' });
+      // store.dispatch(dispatch => {
+      //   setTimeout(() => {
+      //     dispatch({ type: 'increment' });
+      //   }, 2000);
+      // });
     };
 
     document.getElementById('decrement').onclick = function () {
